@@ -1,0 +1,11 @@
+/* Estilos proprios do Ja Pod Quitar.
+   O layout responsivo vem do Bootstrap 5 (RNF01); este arquivo guarda apenas
+   os ajustes de identidade visual e os componentes que o Bootstrap nao cobre. */
+
+:root {
+  --cor-texto: #1c2321;
+  --cor-apoio: #2f6f4e;
+  --cor-alerta: #b45309;
+}
+
+/* TODO (Sprint 1): definir paleta, tipografia e espacamentos do projeto. */

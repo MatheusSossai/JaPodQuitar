@@ -1,0 +1,6 @@
+{# Mensagens flash. Linguagem de acolhimento, sem termos moralizantes (RNF02). #}
+{% with mensagens = get_flashed_messages(with_categories=true) %}
+  {% for categoria, texto in mensagens %}
+    <div class="alert alert-{{ categoria }}" role="alert">{{ texto }}</div>
+  {% endfor %}
+{% endwith %}
