@@ -1,0 +1,43 @@
+{% macro nav_link(endpoint, texto, prefixo=None) -%}
+{%- set ativo = request.endpoint == endpoint or (prefixo and request.endpoint and request.endpoint.startswith(prefixo)) -%}
+<li class="nav-item">
+  <a class="nav-link{{ ' active' if ativo }}" {% if ativo %}aria-current="page" {% endif %}href="{{ url_for(endpoint) }}">{{ texto }}</a>
+</li>
+{%- endmacro %}
+
+{% macro cartao_numero(valor, rotulo, detalhe=None, icone=None, tom="") -%}
+<div class="card h-100 card-numero {{ tom }}">
+  <div class="card-body">
+    {% if icone %}<div class="icone-numero"><i class="bi {{ icone }}"></i></div>{% endif %}
+    <div class="rotulo">{{ rotulo }}</div>
+    <div class="numero-destaque">{{ valor }}</div>
+    {% if detalhe %}<div class="small text-muted mt-1">{{ detalhe }}</div>{% endif %}
+  </div>
+</div>
+{%- endmacro %}
+
+{% macro cartao_materia(conteudo) -%}
+<a class="cartao-materia" href="{{ url_for('conteudo.detalhe', id_conteudo=conteudo.id_conteudo) }}">
+  <span class="tag-categoria"><i class="bi {{ conteudo.icone() }}"></i>{{ conteudo.categoria }}</span>
+  <h3>{{ conteudo.titulo }}</h3>
+  <p>{{ conteudo.resumir(140) }}</p>
+  <div class="rodape-cartao">
+    <span><i class="bi bi-clock me-1"></i>{{ conteudo.tempo_leitura() }} min de leitura</span>
+    <span class="ler">Ler <i class="bi bi-arrow-right"></i></span>
+  </div>
+</a>
+{%- endmacro %}
+
+{% macro materia_destaque(conteudo, limite=230) -%}
+<a class="materia-destaque" href="{{ url_for('conteudo.detalhe', id_conteudo=conteudo.id_conteudo) }}">
+  <i class="bi {{ conteudo.icone() }} icone-fundo" aria-hidden="true"></i>
+  <span class="tag-categoria"><i class="bi {{ conteudo.icone() }}"></i>{{ conteudo.categoria }}</span>
+  <h3>{{ conteudo.titulo }}</h3>
+  <p>{{ conteudo.resumir(limite) }}</p>
+  <span class="ler">Ler matéria completa <i class="bi bi-arrow-right"></i></span>
+</a>
+{%- endmacro %}
+
+{% macro csrf() -%}
+<input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+{%- endmacro %}

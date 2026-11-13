@@ -1,0 +1,9 @@
+{% extends "base.html" %}
+{% block titulo %}Erro {{ codigo }} | Já Pod Quitar{% endblock %}
+{% block conteudo %}
+<div class="container py-5 text-center">
+  <p class="display-5 fw-bold text-muted mb-2">{{ codigo }}</p>
+  <p class="lead">{{ mensagem }}</p>
+  <a class="btn btn-jpq mt-2" href="{{ url_for('principal.index') }}">Voltar para o início</a>
+</div>
+{% endblock %}
