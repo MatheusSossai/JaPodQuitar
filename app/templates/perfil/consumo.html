@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf with context %}
+{% block titulo %}Perfil de consumo | Já Pod Quitar{% endblock %}
+{% block conteudo %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <h1 class="h3 mb-1">Perfil de consumo</h1>
+      <p class="text-muted">
+        Essas respostas servem para calcular a sua economia e acompanhar a evolução. Não precisa ser exato,
+        uma estimativa já ajuda. Ninguém além de você vê esses dados.
+      </p>
+
+      <div class="card">
+        <div class="card-body">
+          <form method="post">
+            {{ csrf() }}
+            <div class="mb-3">
+              <label for="consumo_diario_anterior" class="form-label">Quantas puxadas (puffs) você dá por dia, mais ou menos?</label>
+              <input type="number" class="form-control" id="consumo_diario_anterior" name="consumo_diario_anterior"
+                     min="0" max="5000" value="{{ dados.get('consumo_diario_anterior', '') }}" required>
+            </div>
+
+            <div class="mb-3">
+              <label for="custo_semanal_anterior" class="form-label">Quanto você gasta por semana com pod e refil? (R$)</label>
+              <input type="number" class="form-control" id="custo_semanal_anterior" name="custo_semanal_anterior"
+                     min="0" max="10000" step="0.01" value="{{ dados.get('custo_semanal_anterior', '') }}" required>
+            </div>
+
+            <div class="mb-3">
+              <label for="tempo_uso_meses" class="form-label">Há quanto tempo você usa? (em meses)</label>
+              <input type="number" class="form-control" id="tempo_uso_meses" name="tempo_uso_meses"
+                     min="0" max="600" value="{{ dados.get('tempo_uso_meses', '') }}" required>
+            </div>
+
+            <div class="mb-4">
+              <label for="nivel_dependencia" class="form-label">Como você avalia a sua dependência?</label>
+              <select class="form-select" id="nivel_dependencia" name="nivel_dependencia" required>
+                <option value="">Escolha uma opção</option>
+                {% for nivel in niveis %}
+                  <option value="{{ nivel }}" {% if dados.get('nivel_dependencia') == nivel %}selected{% endif %}>{{ nivel }}</option>
+                {% endfor %}
+              </select>
+              <div class="form-text">
+                Uma dica: se você costuma usar nos primeiros 30 minutos depois de acordar, isso normalmente indica
+                uma dependência maior.
+              </div>
+            </div>
+
+            <button class="btn btn-jpq" type="submit">Salvar perfil</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
