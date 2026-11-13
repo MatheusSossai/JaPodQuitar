@@ -1,0 +1,77 @@
+{% extends "base.html" %}
+{% from "_macros.html" import cartao_materia %}
+{% block titulo %}{{ conteudo.titulo }} | Já Pod Quitar{% endblock %}
+{% block conteudo %}
+<div class="container">
+  <div class="row g-4 g-lg-5">
+    <article class="col-lg-8">
+      <header class="materia-cabecalho">
+        <nav aria-label="breadcrumb">
+          <ol class="breadcrumb mb-3">
+            <li class="breadcrumb-item"><a href="{{ url_for('conteudo.lista') }}">Matérias</a></li>
+            <li class="breadcrumb-item active" aria-current="page">{{ conteudo.categoria }}</li>
+          </ol>
+        </nav>
+        <a class="tag-categoria text-decoration-none" href="{{ url_for('conteudo.lista', categoria=conteudo.categoria) }}">
+          <i class="bi {{ conteudo.icone() }}"></i>{{ conteudo.categoria }}
+        </a>
+        <h1>{{ conteudo.titulo }}</h1>
+        <div class="materia-meta">
+          <span><i class="bi bi-clock"></i>{{ conteudo.tempo_leitura() }} min de leitura</span>
+          <span><i class="bi bi-patch-check"></i>Conteúdo com fonte</span>
+          <span><i class="bi bi-person"></i>Publicado por {{ conteudo.moderador.nome }}</span>
+        </div>
+      </header>
+
+      <div class="texto-materia">
+        {{ conteudo.corpo|formatar_texto }}
+      </div>
+
+      <section class="caixa-fonte mt-5">
+        <h2><i class="bi bi-book me-1"></i> Fontes</h2>
+        {{ conteudo.fonte|nl2br }}
+      </section>
+
+      <div class="aviso-saude mt-3">
+        <i class="bi bi-info-circle"></i>
+        <span>Este conteúdo é informativo e não substitui a avaliação de um profissional de saúde.</span>
+      </div>
+    </article>
+
+    <aside class="col-lg-4">
+      <div class="lateral-materia">
+        <div class="cartao-ajuda mb-4">
+          <h2>Quer ajuda para parar?</h2>
+          <p>O programa do Já Pod Quitar tem missões curtas, uma por vez, e um diário para você acompanhar a sua evolução.</p>
+          {% if current_user.is_authenticated %}
+            <a class="btn btn-coral w-100" href="{{ url_for('painel.inicio') }}">Ir para o meu painel</a>
+          {% else %}
+            <a class="btn btn-coral w-100" href="{{ url_for('auth.cadastro') }}">Criar conta gratuita</a>
+          {% endif %}
+          <a class="btn btn-link w-100 mt-1" href="{{ url_for('principal.apoio') }}">Ver canais de apoio</a>
+        </div>
+
+        {% if mesma_categoria|length > 1 %}
+          <h2 class="h6 text-uppercase mb-2">Mais em {{ conteudo.categoria }}</h2>
+          <div class="lista-lateral">
+            {% for item in mesma_categoria %}
+              <a class="{{ 'atual' if item.id_conteudo == conteudo.id_conteudo }}" href="{{ url_for('conteudo.detalhe', id_conteudo=item.id_conteudo) }}">{{ item.titulo }}</a>
+            {% endfor %}
+          </div>
+        {% endif %}
+      </div>
+    </aside>
+  </div>
+
+  {% if outros %}
+    <section class="mt-5">
+      <h2 class="titulo-secao mb-4">Continue lendo</h2>
+      <div class="row g-4">
+        {% for outro in outros %}
+          <div class="col-md-4">{{ cartao_materia(outro) }}</div>
+        {% endfor %}
+      </div>
+    </section>
+  {% endif %}
+</div>
+{% endblock %}

@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf with context %}
+{% block titulo %}Complementar registro | Já Pod Quitar{% endblock %}
+{% block conteudo %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <h1 class="h3 mb-3">Complementar registro</h1>
+
+      <div class="card mb-3 registro {{ registro.classe_css() }}">
+        <div class="card-body">
+          <div class="d-flex justify-content-between">
+            <span class="selo-tipo fw-semibold">{{ registro.rotulo() }}</span>
+            <span class="small text-muted">{{ registro.data_hora|data_hora_br }}</span>
+          </div>
+          <p class="mb-1">{{ registro.resumo() }}</p>
+          {% if registro.observacao %}
+            <p class="small text-muted mb-0">{{ registro.observacao|nl2br }}</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <p class="small text-muted">
+        O texto original não muda. O que você escrever aqui é adicionado no final, com a data de hoje.
+      </p>
+
+      <form method="post">
+        {{ csrf() }}
+        <div class="mb-3">
+          <label for="complemento" class="form-label">Complemento</label>
+          <textarea class="form-control" id="complemento" name="complemento" rows="3" maxlength="500" required></textarea>
+        </div>
+        <button class="btn btn-jpq" type="submit">Adicionar</button>
+        <a class="btn btn-link" href="{{ url_for('diario.lista', programa=registro.id_programa) }}">Voltar</a>
+      </form>
+    </div>
+  </div>
+</div>
+{% endblock %}

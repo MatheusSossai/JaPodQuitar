@@ -1,0 +1,87 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf with context %}
+{% block titulo %}Novo registro | Já Pod Quitar{% endblock %}
+{% block conteudo %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <h1 class="h3 mb-3">Registrar no diário</h1>
+
+      <ul class="nav nav-pills mb-3">
+        {% for chave, nome in [("sintoma", "Sintoma"), ("recaida", "Recaída"), ("conquista", "Conquista")] %}
+          <li class="nav-item">
+            <a class="nav-link {% if tipo == chave %}active{% endif %}" href="{{ url_for('diario.novo', tipo=chave) }}">{{ nome }}</a>
+          </li>
+        {% endfor %}
+      </ul>
+
+      <div class="card">
+        <div class="card-body">
+          <form method="post" action="{{ url_for('diario.novo', tipo=tipo) }}">
+            {{ csrf() }}
+
+            {% if tipo == "sintoma" %}
+              <div class="mb-3">
+                <label for="sintoma" class="form-label">O que você está sentindo?</label>
+                <select class="form-select" id="sintoma" name="sintoma" data-campo-outro="sintoma_outro" required>
+                  {% for opcao in sintomas %}
+                    <option value="{{ opcao }}" {% if dados.get('sintoma') == opcao %}selected{% endif %}>{{ opcao }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="mb-3 grupo-outro d-none">
+                <label for="sintoma_outro" class="form-label">Qual?</label>
+                <input type="text" class="form-control" id="sintoma_outro" name="sintoma_outro" maxlength="80" value="{{ dados.get('sintoma_outro', '') }}">
+              </div>
+              <div class="mb-3">
+                <label for="intensidade" class="form-label">Intensidade: <strong id="valor-intensidade">3</strong> de 5</label>
+                <input type="range" class="form-range" id="intensidade" name="intensidade" min="1" max="5" step="1"
+                       value="{{ dados.get('intensidade', 3) }}" data-saida="valor-intensidade">
+                <div class="d-flex justify-content-between small text-muted"><span>1, bem leve</span><span>5, muito forte</span></div>
+              </div>
+
+            {% elif tipo == "recaida" %}
+              <p class="small text-muted">
+                Tudo bem. Registrar com sinceridade é o que permite entender o que aconteceu. O seu recorde e os
+                seus dias de programa continuam guardados.
+              </p>
+              <div class="mb-3">
+                <label for="gatilho" class="form-label">O que puxou a vontade?</label>
+                <select class="form-select" id="gatilho" name="gatilho" data-campo-outro="gatilho_outro" required>
+                  {% for opcao in gatilhos %}
+                    <option value="{{ opcao }}" {% if dados.get('gatilho') == opcao %}selected{% endif %}>{{ opcao }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+              <div class="mb-3 grupo-outro d-none">
+                <label for="gatilho_outro" class="form-label">Qual?</label>
+                <input type="text" class="form-control" id="gatilho_outro" name="gatilho_outro" maxlength="80" value="{{ dados.get('gatilho_outro', '') }}">
+              </div>
+              <div class="mb-3">
+                <label for="quantidade_puffs" class="form-label">Quantas puxadas, mais ou menos? (opcional)</label>
+                <input type="number" class="form-control" id="quantidade_puffs" name="quantidade_puffs" min="0" max="2000"
+                       value="{{ dados.get('quantidade_puffs', '') }}">
+              </div>
+
+            {% else %}
+              <div class="mb-3">
+                <label for="marco" class="form-label">O que você conseguiu?</label>
+                <input type="text" class="form-control" id="marco" name="marco" maxlength="150"
+                       placeholder="Ex.: passei a festa sem usar" value="{{ dados.get('marco', '') }}" required>
+              </div>
+            {% endif %}
+
+            <div class="mb-3">
+              <label for="observacao" class="form-label">Quer anotar mais alguma coisa? (opcional)</label>
+              <textarea class="form-control" id="observacao" name="observacao" rows="3" maxlength="500">{{ dados.get('observacao', '') }}</textarea>
+            </div>
+
+            <button class="btn btn-jpq" type="submit">Salvar no diário</button>
+            <a class="btn btn-link" href="{{ url_for('diario.lista') }}">Cancelar</a>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

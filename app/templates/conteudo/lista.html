@@ -1,0 +1,47 @@
+{% extends "base.html" %}
+{% from "_macros.html" import cartao_materia, materia_destaque %}
+{% block titulo %}Matérias | Já Pod Quitar{% endblock %}
+{% block conteudo %}
+<section class="cabecalho-pagina">
+  <div class="container">
+    <span class="etiqueta"><i class="bi bi-journal-text"></i>Módulo informativo</span>
+    <h1 class="mt-3 mb-2">Matérias sobre o cigarro eletrônico</h1>
+    <p class="subtitulo-secao mb-0">
+      Textos curtos sobre o que o pod faz com o corpo, baseados em estudos publicados e em material da OMS,
+      do INCA e da Anvisa. Toda matéria mostra a fonte no final, e você não precisa de cadastro para ler.
+    </p>
+  </div>
+</section>
+
+<div class="container">
+  <nav class="filtro-categorias mb-4" aria-label="Filtrar por categoria">
+    <a class="chip {{ 'ativo' if not categoria_atual }}" href="{{ url_for('conteudo.lista') }}">
+      Todas <span class="qtd">{{ contagem.values()|sum }}</span>
+    </a>
+    {% for categoria in categorias %}
+      {% if contagem.get(categoria) or categoria == categoria_atual %}
+        <a class="chip {{ 'ativo' if categoria == categoria_atual }}" href="{{ url_for('conteudo.lista', categoria=categoria) }}">
+          <i class="bi {{ icones_categoria[categoria] }}"></i>{{ categoria }} <span class="qtd">{{ contagem.get(categoria, 0) }}</span>
+        </a>
+      {% endif %}
+    {% endfor %}
+  </nav>
+
+  {% if conteudos %}
+    {% if not categoria_atual and conteudos|length > 3 %}
+      <div class="mb-4">{{ materia_destaque(conteudos[0], 280) }}</div>
+      {% set resto = conteudos[1:] %}
+    {% else %}
+      {% set resto = conteudos %}
+    {% endif %}
+
+    <div class="row g-4">
+      {% for conteudo in resto %}
+        <div class="col-md-6 col-lg-4">{{ cartao_materia(conteudo) }}</div>
+      {% endfor %}
+    </div>
+  {% else %}
+    <div class="card"><div class="card-body">Nenhuma matéria nessa categoria ainda.</div></div>
+  {% endif %}
+</div>
+{% endblock %}

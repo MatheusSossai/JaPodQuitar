@@ -1,0 +1,122 @@
+{% extends "base.html" %}
+{% from "_macros.html" import cartao_numero %}
+{% block titulo %}Meu painel | Já Pod Quitar{% endblock %}
+{% block conteudo %}
+<div class="container py-4">
+  <h1 class="h3 mb-1">Olá, {{ current_user.nome }}</h1>
+
+  {% if not programa %}
+    <div class="card mt-4">
+      <div class="card-body">
+        <h2 class="h5">Você não tem um programa ativo agora</h2>
+        <p>
+          O programa organiza missões curtas, liberadas uma por vez, e libera o diário para você anotar
+          como está se sentindo. Você escolhe a meta de dias.
+        </p>
+        <a class="btn btn-jpq" href="{{ url_for('programa.novo') }}">Começar um programa</a>
+        {% if qtd_programas %}
+          <a class="btn btn-link" href="{{ url_for('programa.historico') }}">Ver programas anteriores</a>
+        {% endif %}
+      </div>
+    </div>
+  {% else %}
+    <p class="text-muted">Programa iniciado em {{ programa.data_inicio|data_br }}, com meta de {{ programa.meta_dias }} dias.</p>
+
+    {% if alerta_apoio %}
+      <div class="alert alert-warning">
+        <strong>Que tal pedir uma ajuda?</strong>
+        Você registrou {{ recaidas_7_dias }} recaídas nos últimos 7 dias. Isso acontece com muita gente e não é
+        motivo para desistir. Um profissional de saúde pode deixar esse caminho mais leve.
+        <a href="{{ url_for('principal.apoio') }}" class="alert-link">Ver canais de apoio</a>
+      </div>
+    {% endif %}
+
+    {% if meta_atingida %}
+      <div class="alert alert-success">
+        Você chegou na meta de {{ programa.meta_dias }} dias! Se quiser, encerre o programa como concluído na
+        <a href="{{ url_for('programa.detalhe') }}" class="alert-link">página do programa</a>.
+      </div>
+    {% endif %}
+
+    <div class="row g-3 mb-3">
+      <div class="col-6 col-lg-3">
+        {{ cartao_numero(dias_sem_nicotina, "Dias sem nicotina", "Desde " ~ (current_user.data_inicio_abstinencia|data_br), "bi-calendar-check", "tom-verde") }}
+      </div>
+      <div class="col-6 col-lg-3">
+        {% set detalhe_recorde = "Você está no seu recorde!" if recorde > 0 and recorde == dias_sem_nicotina else "Maior sequência no programa" %}
+        {{ cartao_numero(recorde, "Seu recorde (dias)", detalhe_recorde, "bi-trophy", "tom-amarelo") }}
+      </div>
+      <div class="col-6 col-lg-3">
+        {{ cartao_numero(dias_programa, "Dias de programa", "Meta: " ~ programa.meta_dias ~ " dias", "bi-flag") }}
+      </div>
+      <div class="col-6 col-lg-3">
+        {{ cartao_numero(economia|moeda, "Economia estimada", "Gasto anterior: " ~ (current_user.custo_semanal_anterior|moeda) ~ "/semana", "bi-piggy-bank", "tom-coral") }}
+      </div>
+    </div>
+
+    <div class="card mb-4">
+      <div class="card-body">
+        <div class="d-flex justify-content-between small mb-1">
+          <span>Caminho até a meta</span>
+          <span>{{ percentual }}%</span>
+        </div>
+        <div class="progress" role="progressbar" aria-label="Progresso até a meta" aria-valuenow="{{ percentual }}" aria-valuemin="0" aria-valuemax="100">
+          <div class="progress-bar" style="width: {{ percentual }}%; background-color: #1f4e79;"></div>
+        </div>
+        <p class="small text-muted mb-0 mt-2">
+          {{ missoes_concluidas }} de {{ total_missoes }} missões concluídas, {{ pontos }} pontos acumulados.
+        </p>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="card h-100">
+          <div class="card-body">
+            <h2 class="h6 text-uppercase text-muted">Missão atual</h2>
+            {% if missao_atual %}
+              {% set missao = missao_atual.missao %}
+              <p class="small text-muted mb-1">{{ missao.rotulo() }}, dia {{ missao.ordem_dia }}</p>
+              <h3 class="h5">{{ missao.titulo }}</h3>
+              <p>{{ missao.descricao }}</p>
+              <a class="btn btn-jpq" href="{{ url_for('programa.detalhe') }}">Abrir missão</a>
+            {% else %}
+              <p class="mb-0">Você concluiu todas as missões. Continue usando o diário até completar a meta.</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="card h-100">
+          <div class="card-body">
+            <h2 class="h6 text-uppercase text-muted">Registrar no diário</h2>
+            <p class="small text-muted">Como você está agora?</p>
+            <div class="d-flex flex-wrap gap-2">
+              <a class="btn btn-outline-secondary" href="{{ url_for('diario.novo', tipo='sintoma') }}">Sintoma</a>
+              <a class="btn btn-outline-secondary" href="{{ url_for('diario.novo', tipo='recaida') }}">Recaída</a>
+              <a class="btn btn-outline-secondary" href="{{ url_for('diario.novo', tipo='conquista') }}">Conquista</a>
+            </div>
+
+            <h3 class="h6 mt-4">Últimos registros</h3>
+            {% if ultimos_registros %}
+              <ul class="list-unstyled mb-2">
+                {% for registro in ultimos_registros %}
+                  <li class="registro {{ registro.classe_css() }} ps-2 mb-2">
+                    <span class="selo-tipo">{{ registro.rotulo() }}</span>
+                    <span class="small text-muted"> | {{ registro.data_hora|data_hora_br }}</span><br>
+                    <span class="small">{{ registro.resumo() }}</span>
+                  </li>
+                {% endfor %}
+              </ul>
+              <a class="small" href="{{ url_for('diario.lista') }}">Ver diário completo</a>
+            {% else %}
+              <p class="small text-muted mb-0">Nada registrado ainda.</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

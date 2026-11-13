@@ -1,0 +1,96 @@
+{% extends "base.html" %}
+{% block titulo %}Meus padrões | Já Pod Quitar{% endblock %}
+{% block conteudo %}
+<div class="container py-4">
+  <h1 class="h3 mb-1">Meus padrões</h1>
+  <p class="text-muted">
+    Resumo feito a partir de tudo o que você registrou no diário (em todos os programas). Quanto mais
+    registros, mais claro fica.
+  </p>
+
+  {% if resumo.total_registros == 0 %}
+    <div class="card">
+      <div class="card-body">
+        Ainda não tem registros suficientes. <a href="{{ url_for('diario.novo') }}">Fazer o primeiro registro</a>
+      </div>
+    </div>
+  {% else %}
+    <p>
+      {{ resumo.total_registros }} registros no total:
+      {% for nome, qtd in resumo.por_tipo.items() %}{{ qtd }} {{ nome|lower }}{{ ", " if not loop.last }}{% endfor %}.
+    </p>
+
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="card h-100">
+          <div class="card-body">
+            <h2 class="h6 text-uppercase text-muted">Gatilhos das recaídas</h2>
+            {% if resumo.gatilhos %}
+              {% for item in resumo.gatilhos %}
+                <div class="d-flex justify-content-between small"><span>{{ item.nome }}</span><span>{{ item.quantidade }}</span></div>
+                <div class="progress mb-2" style="height: 8px;" role="progressbar" aria-label="{{ item.nome }}" aria-valuenow="{{ item.percentual }}" aria-valuemin="0" aria-valuemax="100">
+                  <div class="progress-bar" style="width: {{ item.percentual }}%; background-color: #c0504d;"></div>
+                </div>
+              {% endfor %}
+            {% else %}
+              <p class="small text-muted mb-0">Nenhuma recaída registrada.</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="card h-100">
+          <div class="card-body">
+            <h2 class="h6 text-uppercase text-muted">Horário das recaídas</h2>
+            {% if resumo.total_recaidas %}
+              {% for item in resumo.periodos %}
+                <div class="d-flex justify-content-between small"><span>{{ item.nome }}</span><span>{{ item.quantidade }}</span></div>
+                <div class="progress mb-2" style="height: 8px;" role="progressbar" aria-label="{{ item.nome }}" aria-valuenow="{{ item.percentual }}" aria-valuemin="0" aria-valuemax="100">
+                  <div class="progress-bar" style="width: {{ item.percentual }}%; background-color: #1f4e79;"></div>
+                </div>
+              {% endfor %}
+            {% else %}
+              <p class="small text-muted mb-0">Nenhuma recaída registrada.</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="card h-100">
+          <div class="card-body">
+            <h2 class="h6 text-uppercase text-muted">Sintomas mais relatados</h2>
+            {% if resumo.sintomas %}
+              <table class="table table-sm mb-0">
+                <thead><tr><th>Sintoma</th><th class="text-end">Vezes</th><th class="text-end">Intensidade média</th></tr></thead>
+                <tbody>
+                  {% for item in resumo.sintomas %}
+                    <tr><td>{{ item.nome }}</td><td class="text-end">{{ item.quantidade }}</td><td class="text-end">{{ item.media }}</td></tr>
+                  {% endfor %}
+                </tbody>
+              </table>
+            {% else %}
+              <p class="small text-muted mb-0">Nenhum sintoma registrado.</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+
+      <div class="col-lg-6">
+        <div class="card h-100">
+          <div class="card-body">
+            <h2 class="h6 text-uppercase text-muted">O que você escreveu no dia 1</h2>
+            {% if resumo.mapeamento_inicial %}
+              <p class="mb-2">{{ resumo.mapeamento_inicial|nl2br }}</p>
+              <p class="small text-muted mb-0">Compare com os gatilhos das recaídas: eles batem com o que você imaginava?</p>
+            {% else %}
+              <p class="small text-muted mb-0">Você ainda não concluiu a missão de mapeamento de gatilhos.</p>
+            {% endif %}
+          </div>
+        </div>
+      </div>
+    </div>
+  {% endif %}
+</div>
+{% endblock %}

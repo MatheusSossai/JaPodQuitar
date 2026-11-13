@@ -1,0 +1,46 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf with context %}
+{% block titulo %}Gerenciar conteúdos | Já Pod Quitar{% endblock %}
+{% block conteudo %}
+<div class="container py-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+    <h1 class="h3 mb-0">Conteúdos informativos</h1>
+    <a class="btn btn-jpq" href="{{ url_for('moderacao.novo_conteudo') }}">Novo conteúdo</a>
+  </div>
+
+  <div class="table-responsive">
+    <table class="table table-hover align-middle bg-white">
+      <thead class="table-light">
+        <tr>
+          <th>#</th>
+          <th>Título</th>
+          <th>Categoria</th>
+          <th>Publicado por</th>
+          <th class="text-end">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for conteudo in conteudos %}
+          <tr>
+            <td>{{ conteudo.id_conteudo }}</td>
+            <td>{{ conteudo.titulo }}</td>
+            <td>{{ conteudo.categoria }}</td>
+            <td class="small">{{ conteudo.moderador.nome }}</td>
+            <td class="text-end text-nowrap">
+              <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('conteudo.detalhe', id_conteudo=conteudo.id_conteudo) }}" target="_blank">Ver</a>
+              <a class="btn btn-sm btn-outline-primary" href="{{ url_for('moderacao.editar_conteudo', id_conteudo=conteudo.id_conteudo) }}">Editar</a>
+              <form method="post" action="{{ url_for('moderacao.excluir_conteudo', id_conteudo=conteudo.id_conteudo) }}" class="d-inline"
+                    data-confirmar="Excluir o conteúdo &quot;{{ conteudo.titulo }}&quot;?">
+                {{ csrf() }}
+                <button class="btn btn-sm btn-outline-danger" type="submit">Excluir</button>
+              </form>
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="5" class="text-muted">Nenhum conteúdo cadastrado.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

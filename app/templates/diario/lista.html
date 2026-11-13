@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block titulo %}Diário | Já Pod Quitar{% endblock %}
+{% block conteudo %}
+<div class="container py-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-1">
+    <h1 class="h3 mb-0">Diário de progresso</h1>
+    {% if programa and programa.status == "ativo" %}
+      <div class="d-flex flex-wrap gap-2">
+        <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('diario.novo', tipo='sintoma') }}">+ Sintoma</a>
+        <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('diario.novo', tipo='recaida') }}">+ Recaída</a>
+        <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('diario.novo', tipo='conquista') }}">+ Conquista</a>
+        <a class="btn btn-jpq btn-sm" href="{{ url_for('diario.padroes') }}">Ver meus padrões</a>
+      </div>
+    {% endif %}
+  </div>
+
+  {% if not programa %}
+    <p class="mt-3">Você não tem um programa ativo. <a href="{{ url_for('programa.novo') }}">Começar um programa</a></p>
+  {% else %}
+    <p class="text-muted">
+      {% if programa.status != "ativo" %}
+        Diário do programa iniciado em {{ programa.data_inicio|data_br }} ({{ programa.status_legivel()|lower }}).
+      {% else %}
+        O registro mais recente aparece primeiro. Os registros não podem ser apagados, só complementados,
+        para o seu histórico ficar completo.
+      {% endif %}
+    </p>
+
+    {% if registros %}
+      <div class="list-group">
+        {% for registro in registros %}
+          <div class="list-group-item registro {{ registro.classe_css() }}">
+            <div class="d-flex flex-wrap justify-content-between gap-2">
+              <span class="selo-tipo fw-semibold">{{ registro.rotulo() }}</span>
+              <span class="small text-muted">{{ registro.data_hora|data_hora_br }}</span>
+            </div>
+            <p class="mb-1">{{ registro.resumo() }}</p>
+            {% if registro.observacao %}
+              <p class="small text-muted mb-1">{{ registro.observacao|nl2br }}</p>
+            {% endif %}
+            <a class="small" href="{{ url_for('diario.complementar', id_registro=registro.id_registro) }}">Complementar</a>
+          </div>
+        {% endfor %}
+      </div>
+    {% else %}
+      <div class="card">
+        <div class="card-body">
+          <p class="mb-0">
+            Nada registrado ainda. Sempre que sentir um sintoma, tiver uma recaída ou conseguir algo que
+            parecia difícil, anote aqui. Com o tempo dá para ver seus padrões.
+          </p>
+        </div>
+      </div>
+    {% endif %}
+  {% endif %}
+</div>
+{% endblock %}

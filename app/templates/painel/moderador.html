@@ -1,0 +1,85 @@
+{% extends "base.html" %}
+{% from "_macros.html" import cartao_numero %}
+{% block titulo %}Indicadores | Já Pod Quitar{% endblock %}
+{% block conteudo %}
+<div class="container py-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-1">
+    <h1 class="h3 mb-0">Indicadores da plataforma</h1>
+    <div class="d-flex gap-2">
+      <a class="btn btn-jpq btn-sm" href="{{ url_for('moderacao.novo_conteudo') }}">Novo conteúdo</a>
+      <a class="btn btn-outline-secondary btn-sm" href="{{ url_for('moderacao.nova_missao') }}">Nova missão</a>
+    </div>
+  </div>
+  <p class="text-muted">Todos os números são agregados e não identificam nenhuma pessoa.</p>
+
+  <div class="row g-3 mb-4">
+    <div class="col-6 col-lg-3">{{ cartao_numero(ind.total_usuarios, "Usuários cadastrados", None, "bi-people") }}</div>
+    <div class="col-6 col-lg-3">{{ cartao_numero(ind.total_programas, "Programas criados", ind.programas_ativos ~ " ativos agora", "bi-flag", "tom-verde") }}</div>
+    <div class="col-6 col-lg-3">{{ cartao_numero(ind.acessos_anonimos, "Acessos sem cadastro", "Módulo de matérias", "bi-eye", "tom-amarelo") }}</div>
+    <div class="col-6 col-lg-3">{{ cartao_numero(ind.total_cliques, "Cliques em canais de apoio", None, "bi-telephone-outbound", "tom-coral") }}</div>
+  </div>
+
+  <div class="row g-4">
+    <div class="col-lg-6">
+      <div class="card h-100">
+        <div class="card-body">
+          <h2 class="h6 text-uppercase text-muted">Adesão ao programa</h2>
+          <table class="table table-sm align-middle mb-0">
+            <thead>
+              <tr><th>Indicador</th><th class="text-end">Resultado</th></tr>
+            </thead>
+            <tbody>
+              <tr>
+                <td>Concluíram a missão do dia 1 (mapeamento de gatilhos)</td>
+                <td class="text-end text-nowrap">{{ ind.dia_um.percentual|pct }} <span class="text-muted small">({{ ind.dia_um.quantidade }})</span></td>
+              </tr>
+              <tr>
+                <td>Continuavam ativos no 7º dia</td>
+                <td class="text-end text-nowrap">{{ ind.dia_7.percentual|pct }} <span class="text-muted small">({{ ind.dia_7.ativos }} de {{ ind.dia_7.elegiveis }})</span></td>
+              </tr>
+              <tr>
+                <td>Continuavam ativos no 30º dia</td>
+                <td class="text-end text-nowrap">{{ ind.dia_30.percentual|pct }} <span class="text-muted small">({{ ind.dia_30.ativos }} de {{ ind.dia_30.elegiveis }})</span></td>
+              </tr>
+            </tbody>
+          </table>
+          <p class="small text-muted mt-2 mb-0">Para os dias 7 e 30 só entram programas que já tiveram tempo de chegar nesse dia.</p>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-6">
+      <div class="card mb-4">
+        <div class="card-body">
+          <h2 class="h6 text-uppercase text-muted">Cliques por canal de apoio</h2>
+          <table class="table table-sm mb-0">
+            <tbody>
+              {% for nome, quantidade in ind.cliques_apoio %}
+                <tr><td>{{ nome }}</td><td class="text-end">{{ quantidade }}</td></tr>
+              {% endfor %}
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <h2 class="h6 text-uppercase text-muted">Gatilhos mais citados nas recaídas</h2>
+          {% if ind.gatilhos %}
+            <table class="table table-sm mb-0">
+              <tbody>
+                {% for nome, quantidade in ind.gatilhos %}
+                  <tr><td>{{ nome }}</td><td class="text-end">{{ quantidade }}</td></tr>
+                {% endfor %}
+              </tbody>
+            </table>
+            <p class="small text-muted mt-2 mb-0">Ajuda a decidir quais conteúdos e missões criar.</p>
+          {% else %}
+            <p class="small text-muted mb-0">Ainda não há recaídas registradas.</p>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
