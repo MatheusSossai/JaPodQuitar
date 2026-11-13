@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf with context %}
+{% block titulo %}Novo programa | Já Pod Quitar{% endblock %}
+{% block conteudo %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-7">
+      <h1 class="h3 mb-1">{% if ja_teve_programa %}Começar um novo programa{% else %}Começar o programa{% endif %}</h1>
+      <p class="text-muted">
+        São {{ total_missoes }} missões curtas, liberadas uma de cada vez e na ordem. A primeira é mapear os
+        seus gatilhos, porque o resto do programa se apoia nisso. Você só pode ter um programa ativo por vez.
+      </p>
+
+      <div class="card">
+        <div class="card-body">
+          <form method="post">
+            {{ csrf() }}
+            <div class="mb-3">
+              <label for="meta_dias" class="form-label">Meta de dias sem nicotina</label>
+              <select class="form-select" id="meta_dias" name="meta_dias">
+                {% for opcao in [7, 14, 21, 30, 60, 90] %}
+                  <option value="{{ opcao }}" {% if (dados.get('meta_dias') or '30') == opcao|string %}selected{% endif %}>{{ opcao }} dias</option>
+                {% endfor %}
+              </select>
+              <div class="form-text">Se não souber, 30 dias é um bom começo. Dá para começar outro programa depois.</div>
+            </div>
+
+            <div class="mb-4">
+              <label for="data_inicio" class="form-label">Quando você parou (ou vai parar)?</label>
+              <input type="date" class="form-control" id="data_inicio" name="data_inicio"
+                     value="{{ dados.get('data_inicio') or hoje.isoformat() }}"
+                     min="{{ data_minima.isoformat() }}" max="{{ hoje.isoformat() }}">
+              <div class="form-text">Se você já está alguns dias sem usar, pode colocar a data em que parou.</div>
+            </div>
+
+            <button class="btn btn-jpq" type="submit">Começar programa</button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

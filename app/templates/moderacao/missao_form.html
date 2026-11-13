@@ -1,0 +1,78 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf with context %}
+{% block titulo %}{{ "Editar" if missao else "Nova" }} missão | Já Pod Quitar{% endblock %}
+{% block conteudo %}
+{% set nomes_tipo = {"reflexiva": "Reflexiva", "pratica": "Prática", "educativa": "Educativa"} %}
+<div class="container py-4">
+  <div class="row justify-content-center">
+    <div class="col-lg-8">
+      <h1 class="h3 mb-3">{{ "Editar missão" if missao else "Nova missão" }}</h1>
+
+      {% if not missao %}
+        <ul class="nav nav-pills mb-3">
+          {% for chave, nome in nomes_tipo.items() %}
+            <li class="nav-item">
+              <a class="nav-link {% if tipo == chave %}active{% endif %}" href="{{ url_for('moderacao.nova_missao', tipo=chave) }}">{{ nome }}</a>
+            </li>
+          {% endfor %}
+        </ul>
+      {% else %}
+        <p class="text-muted">Tipo: {{ nomes_tipo[tipo] }} (o tipo não muda depois de criada).</p>
+      {% endif %}
+
+      <div class="card">
+        <div class="card-body">
+          <form method="post">
+            {{ csrf() }}
+            <div class="row g-3 mb-3">
+              <div class="col-sm-9">
+                <label for="titulo" class="form-label">Título</label>
+                <input type="text" class="form-control" id="titulo" name="titulo" maxlength="120" value="{{ dados.get('titulo', '') }}" required>
+              </div>
+              <div class="col-sm-3">
+                <label for="ordem_dia" class="form-label">Dia</label>
+                <input type="number" class="form-control" id="ordem_dia" name="ordem_dia" min="1" max="365" value="{{ dados.get('ordem_dia', '') }}" required>
+              </div>
+            </div>
+
+            <div class="mb-3">
+              <label for="descricao" class="form-label">Descrição</label>
+              <textarea class="form-control" id="descricao" name="descricao" rows="2" maxlength="1000" required>{{ dados.get('descricao', '') }}</textarea>
+            </div>
+
+            {% if tipo == "reflexiva" %}
+              <div class="mb-3">
+                <label for="pergunta_gatilho" class="form-label">Pergunta</label>
+                <textarea class="form-control" id="pergunta_gatilho" name="pergunta_gatilho" rows="3" maxlength="1000" required>{{ dados.get('pergunta_gatilho') or '' }}</textarea>
+                <div class="form-text">A pessoa vai precisar responder essa pergunta para concluir a missão.</div>
+              </div>
+            {% elif tipo == "pratica" %}
+              <div class="mb-3">
+                <label for="acao_substituta" class="form-label">Ação substituta</label>
+                <textarea class="form-control" id="acao_substituta" name="acao_substituta" rows="3" maxlength="1000" required>{{ dados.get('acao_substituta') or '' }}</textarea>
+              </div>
+              <div class="mb-3">
+                <label for="duracao_min" class="form-label">Duração do cronômetro (minutos)</label>
+                <input type="number" class="form-control" id="duracao_min" name="duracao_min" min="1" max="240" value="{{ dados.get('duracao_min') or '' }}" required>
+              </div>
+            {% else %}
+              <div class="mb-3">
+                <label for="id_conteudo" class="form-label">Conteúdo que a pessoa vai ler</label>
+                <select class="form-select" id="id_conteudo" name="id_conteudo" required>
+                  <option value="">Escolha</option>
+                  {% for conteudo in conteudos %}
+                    <option value="{{ conteudo.id_conteudo }}" {% if dados.get('id_conteudo')|string == conteudo.id_conteudo|string %}selected{% endif %}>{{ conteudo.titulo }}</option>
+                  {% endfor %}
+                </select>
+              </div>
+            {% endif %}
+
+            <button class="btn btn-jpq" type="submit">{{ "Salvar alterações" if missao else "Adicionar ao catálogo" }}</button>
+            <a class="btn btn-link" href="{{ url_for('moderacao.missoes') }}">Cancelar</a>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}

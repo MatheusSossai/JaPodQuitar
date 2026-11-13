@@ -1,0 +1,57 @@
+{% extends "base.html" %}
+{% block titulo %}Histórico de programas | Já Pod Quitar{% endblock %}
+{% block conteudo %}
+<div class="container py-4">
+  <h1 class="h3 mb-1">Histórico de programas</h1>
+  <p class="text-muted">Os programas encerrados continuam guardados aqui, com as missões e o diário de cada um.</p>
+
+  {% if programas %}
+    <div class="table-responsive">
+      <table class="table table-hover align-middle bg-white">
+        <thead class="table-light">
+          <tr>
+            <th>Início</th>
+            <th>Fim</th>
+            <th>Meta</th>
+            <th>Dias de programa</th>
+            <th>Recorde</th>
+            <th>Missões</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>
+          {% for programa in programas %}
+            <tr>
+              <td>{{ programa.data_inicio|data_br }}</td>
+              <td>{{ programa.data_fim|data_br }}</td>
+              <td>{{ programa.meta_dias }} dias</td>
+              <td>{{ programa.dias_de_programa(hoje) }}</td>
+              <td>{{ programa.recorde_dias(hoje) }} dias</td>
+              <td>{{ programa.missoes_concluidas()|length }} de {{ programa.itens_fila|length }}</td>
+              <td>
+                {% if programa.status == "ativo" %}
+                  <span class="badge text-bg-primary">{{ programa.status_legivel() }}</span>
+                {% elif programa.status == "concluido" %}
+                  <span class="badge text-bg-success">{{ programa.status_legivel() }}</span>
+                {% else %}
+                  <span class="badge text-bg-secondary">{{ programa.status_legivel() }}</span>
+                {% endif %}
+              </td>
+              <td class="text-end">
+                <a class="btn btn-sm btn-outline-secondary" href="{{ url_for('diario.lista', programa=programa.id_programa) }}">Ver diário</a>
+              </td>
+            </tr>
+          {% endfor %}
+        </tbody>
+      </table>
+    </div>
+  {% else %}
+    <p>Você ainda não começou nenhum programa.</p>
+  {% endif %}
+
+  {% if not current_user.programa_ativo() %}
+    <a class="btn btn-jpq" href="{{ url_for('programa.novo') }}">Começar um programa</a>
+  {% endif %}
+</div>
+{% endblock %}

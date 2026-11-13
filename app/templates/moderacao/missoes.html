@@ -1,0 +1,49 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf with context %}
+{% block titulo %}Gerenciar missões | Já Pod Quitar{% endblock %}
+{% block conteudo %}
+<div class="container py-4">
+  <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-1">
+    <h1 class="h3 mb-0">Catálogo de missões</h1>
+    <a class="btn btn-jpq" href="{{ url_for('moderacao.nova_missao') }}">Nova missão</a>
+  </div>
+  <p class="text-muted">
+    As missões entram na fila dos novos programas na ordem do dia. A missão do dia 1 precisa ser reflexiva
+    (mapeamento de gatilhos). Uma missão que já está em algum programa não pode ser excluída, só editada.
+  </p>
+
+  <div class="table-responsive">
+    <table class="table table-hover align-middle bg-white">
+      <thead class="table-light">
+        <tr>
+          <th>Dia</th>
+          <th>Título</th>
+          <th>Tipo</th>
+          <th class="text-center">Em programas</th>
+          <th class="text-end">Ações</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for missao, usos in catalogo %}
+          <tr>
+            <td>{{ missao.ordem_dia }}</td>
+            <td>{{ missao.titulo }}</td>
+            <td>{{ missao.rotulo() }}</td>
+            <td class="text-center">{{ usos }}</td>
+            <td class="text-end text-nowrap">
+              <a class="btn btn-sm btn-outline-primary" href="{{ url_for('moderacao.editar_missao', id_missao=missao.id_missao) }}">Editar</a>
+              <form method="post" action="{{ url_for('moderacao.excluir_missao', id_missao=missao.id_missao) }}" class="d-inline"
+                    data-confirmar="Excluir a missão &quot;{{ missao.titulo }}&quot;?">
+                {{ csrf() }}
+                <button class="btn btn-sm btn-outline-danger" type="submit" {% if usos %}disabled title="Já usada em programas"{% endif %}>Excluir</button>
+              </form>
+            </td>
+          </tr>
+        {% else %}
+          <tr><td colspan="5" class="text-muted">Nenhuma missão cadastrada.</td></tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+</div>
+{% endblock %}

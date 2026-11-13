@@ -1,0 +1,150 @@
+{% extends "base.html" %}
+{% from "_macros.html" import csrf with context %}
+{% block titulo %}Meu programa | Já Pod Quitar{% endblock %}
+{% block conteudo %}
+{% set total = programa.itens_fila|length %}
+{% set pct_missoes = ((concluidas|length / total * 100)|round|int) if total else 0 %}
+<div class="container py-4">
+  <h1 class="h3 mb-1">Meu programa</h1>
+  <p class="text-muted">
+    Começou em {{ programa.data_inicio|data_br }}. Meta de {{ programa.meta_dias }} dias,
+    você está com {{ programa.dias_de_programa(hoje) }} dias de programa.
+  </p>
+
+  <div class="row g-4">
+    <div class="col-lg-7">
+      {% if atual %}
+        {% set missao = atual.missao %}
+        <div class="card shadow-sm">
+          <div class="card-header bg-white d-flex justify-content-between align-items-center">
+            <span class="fw-semibold">Missão em andamento</span>
+            <span class="badge text-bg-light border">{{ missao.rotulo() }} | dia {{ missao.ordem_dia }}</span>
+          </div>
+          <div class="card-body">
+            <h2 class="h4">{{ missao.titulo }}</h2>
+            <p>{{ missao.descricao }}</p>
+
+            <div class="caixa-acao mb-3">
+              <strong>{{ missao.executar() }}</strong>
+            </div>
+            <p class="small text-muted">{{ missao.orientacao() }}</p>
+
+            {% if missao.duracao_min %}
+              <div id="caixa-cronometro" class="text-center border rounded p-3 mb-3" data-minutos="{{ missao.duracao_min }}">
+                <div class="cronometro mb-2">00:00</div>
+                <button type="button" class="btn btn-outline-primary btn-sm" data-acao="iniciar">Iniciar</button>
+                <button type="button" class="btn btn-outline-secondary btn-sm" data-acao="zerar">Zerar</button>
+                <p class="aviso-fim text-success small mt-2 mb-0 d-none">
+                  Tempo concluído. Se a vontade passou, você acabou de mostrar que consegue atravessar ela.
+                </p>
+              </div>
+            {% endif %}
+
+            {% if missao.conteudo %}
+              <p>
+                <a href="{{ url_for('conteudo.detalhe', id_conteudo=missao.conteudo.id_conteudo) }}" target="_blank" rel="noopener">
+                  Abrir o texto "{{ missao.conteudo.titulo }}"
+                </a>
+              </p>
+            {% endif %}
+
+            <form method="post" action="{{ url_for('programa.concluir_missao') }}">
+              {{ csrf() }}
+              {% if missao.exige_resposta() %}
+                <label for="resposta" class="form-label">Sua resposta</label>
+                <textarea class="form-control" id="resposta" name="resposta" rows="4" maxlength="2000" required></textarea>
+                <div class="form-text mb-3">Só você vê essa resposta.</div>
+              {% endif %}
+              <button class="btn btn-success" type="submit">Concluir missão</button>
+            </form>
+
+            {% if not fila.esta_vazia() %}
+              <form method="post" action="{{ url_for('programa.adiar_missao') }}" class="mt-2"
+                    data-confirmar="A missão vai para o fim da fila e a próxima será liberada. Continuar?">
+                {{ csrf() }}
+                <button class="btn btn-link btn-sm px-0" type="submit">Não consigo fazer essa agora, adiar</button>
+              </form>
+            {% endif %}
+          </div>
+        </div>
+      {% else %}
+        <div class="card">
+          <div class="card-body">
+            <h2 class="h5">Todas as missões foram concluídas</h2>
+            <p class="mb-0">
+              Continue usando o diário até completar a sua meta. Quando quiser, encerre o programa como concluído
+              aqui do lado.
+            </p>
+          </div>
+        </div>
+      {% endif %}
+    </div>
+
+    <div class="col-lg-5">
+      <div class="card mb-3">
+        <div class="card-body">
+          <h2 class="h6 text-uppercase text-muted">Andamento</h2>
+          <p class="mb-1">{{ concluidas|length }} de {{ total }} missões concluídas</p>
+          <div class="progress mb-2" role="progressbar" aria-label="Missões concluídas" aria-valuenow="{{ pct_missoes }}" aria-valuemin="0" aria-valuemax="100">
+            <div class="progress-bar bg-success" style="width: {{ pct_missoes }}%"></div>
+          </div>
+          <p class="small text-muted mb-0">
+            {{ fila.tamanho() }} missões esperando na fila. Elas são liberadas uma por vez, na ordem.
+          </p>
+          {% if programa.proxima_missao() %}
+            <p class="small mb-0 mt-1"><span class="missao-bloqueada">A próxima fica bloqueada até você concluir ou adiar a atual.</span></p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="card mb-3">
+        <div class="card-body">
+          <h2 class="h6 text-uppercase text-muted">Missões concluídas</h2>
+          {% if concluidas %}
+            <ul class="list-unstyled mb-0">
+              {% for item in concluidas|reverse %}
+                <li class="py-2 {% if not loop.last %}border-bottom{% endif %}">
+                  <div class="d-flex justify-content-between gap-2">
+                    <span>{{ item.missao.titulo }}</span>
+                    <span class="small text-muted text-nowrap">{{ item.data_conclusao|data_br }}</span>
+                  </div>
+                  {% if item.resposta %}
+                    <details class="small mt-1">
+                      <summary>Ver minha resposta</summary>
+                      <div class="mt-1">{{ item.resposta|nl2br }}</div>
+                    </details>
+                  {% endif %}
+                </li>
+              {% endfor %}
+            </ul>
+          {% else %}
+            <p class="small text-muted mb-0">Nenhuma ainda. A primeira é a mais importante.</p>
+          {% endif %}
+        </div>
+      </div>
+
+      <div class="card">
+        <div class="card-body">
+          <h2 class="h6 text-uppercase text-muted">Encerrar programa</h2>
+          {% if programa.pode_ser_concluido(hoje) %}
+            <form method="post" action="{{ url_for('programa.encerrar') }}" class="mb-2">
+              {{ csrf() }}
+              <input type="hidden" name="motivo" value="concluido">
+              <button class="btn btn-success btn-sm" type="submit">Encerrar como concluído</button>
+            </form>
+          {% endif %}
+          <form method="post" action="{{ url_for('programa.encerrar') }}"
+                data-confirmar="Interromper o programa? Nada é apagado, ele vai para o histórico.">
+            {{ csrf() }}
+            <input type="hidden" name="motivo" value="interrompido">
+            <button class="btn btn-outline-danger btn-sm" type="submit">Interromper programa</button>
+          </form>
+          <p class="small text-muted mt-2 mb-0">
+            Interromper não apaga nada. O programa fica no seu histórico e você pode começar outro quando quiser.
+          </p>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %}
